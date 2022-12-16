@@ -1,0 +1,59 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: sample-rest-service-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sample-rest-application
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: sample-rest-application
+    spec:
+      imagePullSecrets:
+        - name: docker-io-credentials
+      volumes:
+        - name: spring-rest-config
+          configMap:
+            name: spring-rest-configmap
+            items:
+            - key: application.yml
+              path: application.yml
+        - name: spring-rest-secrets
+          secret:
+            secretName: spring-rest-secret
+            items:
+            - key: certificate
+              path: certificate
+      containers:
+        - name: spring-rest-hello-world-rest-service
+          image: 'docker.io/chetangsanghi/spring-boot-rest-hello-private:1.0.0-latest'
+          volumeMounts:
+          - name: spring-rest-config
+            mountPath: /usr/local/config
+          - name: spring-rest-secrets
+            mountPath: /usr/local/secrets
+          env:
+          - name: MSG_TEMPLATE
+            valueFrom:
+              configMapKeyRef:
+                name: spring-rest-configmap
+                key: MSG_TEMPLATE
+          - name: SPRING_CONFIG_LOCATION
+            value: /usr/local/config/
+          - name: USER_ID
+            valueFrom:
+              secretKeyRef:
+                name: spring-rest-secret
+                key: USER_ID
+          - name: PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: spring-rest-secret
+                key: PASSWORD
+          - name: CERT_FILE_PATH
+            value: /usr/local/secrets/certificate

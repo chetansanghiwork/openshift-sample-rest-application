@@ -1,0 +1,13 @@
+﻿kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: sample-rest-configmap
+data:
+  MSG_TEMPLATE: Chetan Sanghi Openshift Training %s!
+  application.yml: |-
+    server:
+      port: 8080
+
+    logging:
+      level:
+        root: DEBUG
